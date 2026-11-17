@@ -1,0 +1,5 @@
+name: "video_link_transcribe"
+title: "Transcrever vídeo de link e resumir"
+description: "Baixa o vídeo de um link, extrai o áudio, transcreve e resume, apagando vídeo e áudio ao longo da esteira."
+category: "Work and knowledge"
+include_in_prompt: false
