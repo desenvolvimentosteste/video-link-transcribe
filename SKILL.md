@@ -38,6 +38,18 @@
 
 - Trate os arquivos de pedaços como trabalho parcial até o helper escrever `complete.json` e `transcript.txt`.
 
+## Inferir o nome quando ele não é dito
+
+- Quando o vídeo descrever um método, ferramenta, fórmula ou processo sem dizer o nome, infira o nome a partir da descrição, dos frames e da transcrição.
+
+- Compare os detalhes descritos, como funções, telas, termos e resultados, com ferramentas e métodos conhecidos, e identifique o mais compatível.
+
+- Busque na web para confirmar o nome quando houver dúvida, e cite a fonte usada para confirmar.
+
+- Diga claramente quando o nome é uma inferência e qual é o nível de confiança, e não apresente um palpite como fato dito no vídeo.
+
+- Se mais de um nome for plausível, apresente as opções com o motivo de cada uma, em vez de escolher uma só.
+
 ## Resumir o texto
 
 - Leia `transcript.txt` e resuma o conteúdo em português, com os pontos principais e sem inventar falas que não estejam no texto.

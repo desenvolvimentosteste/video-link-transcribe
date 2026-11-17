@@ -8,7 +8,7 @@ Baixa o vídeo de um link, extrai o áudio, transcreve e resume, apagando vídeo
 2. Extrai um frame por segundo com `ffmpeg` e monta uma grade de contato, para ler na tela nomes de sites e ferramentas que o áudio não deixa claro. Os frames são apagados depois da leitura.
 3. Extrai o áudio com `ffmpeg` (mono, 16 kHz, mp3) e apaga o vídeo original.
 4. Transcreve o áudio em pedaços de 60 segundos com `faster-whisper` (modelo leve `whisper-tiny`) e apaga o áudio original.
-5. Só fica o texto, que é resumido.
+5. Só fica o texto, que é resumido. Quando o vídeo descrever um método ou ferramenta sem dizer o nome, o agente infere o nome a partir da descrição, dos frames e da transcrição, e diz que é uma inferência.
 
 ## Uso
 
