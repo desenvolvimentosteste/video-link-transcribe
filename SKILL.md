@@ -10,6 +10,16 @@
 
 - Saiba que YouTube costuma funcionar, e Instagram e TikTok nem sempre deixam baixar, pois podem bloquear ou pedir login.
 
+## Extrair frames e ler a tela
+
+- Extraia um frame por segundo com `ffmpeg`, em largura máxima de 640 pixels, para a pasta `frames/` da pasta de trabalho, e monte uma grade de contato em `contact.jpg`.
+
+- Leia os frames com `muse.read`, que mostra as imagens, e identifique nomes de sites, ferramentas e textos que aparecem na tela e que a transcrição do áudio não captou.
+
+- Use OCR apenas como apoio, pois a leitura visual direta costuma ser mais precisa para nomes e logos na tela.
+
+- Apague os frames e a grade de contato depois de ler as imagens, junto com o vídeo, e não guarde cópia deles.
+
 ## Extrair o áudio e apagar o vídeo
 
 - Extraia o áudio do vídeo com `ffmpeg`, em mono, 16 kHz, formato mp3.

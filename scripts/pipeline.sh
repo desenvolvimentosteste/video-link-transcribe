@@ -26,6 +26,16 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg não instalado." >&2; exit 1; }
 echo "Passo 1: baixando o vídeo..."
 "$YTDLP" -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --merge-output-format mp4 -o "$VIDEO" "$URL"
 
+echo "Passo 1b: extraindo frames para leitura visual..."
+FRAMES="$WORKDIR/frames"
+mkdir -p "$FRAMES"
+ffmpeg -y -i "$VIDEO" -vf "fps=1,scale=640:-1" "$FRAMES/frame-%03d.jpg" 2>/dev/null
+COUNT=$(ls "$FRAMES"/frame-*.jpg 2>/dev/null | wc -l)
+COLS=6
+ROWS=$(( (COUNT + COLS - 1) / COLS ))
+ffmpeg -y -framerate 1 -i "$FRAMES/frame-%03d.jpg" -filter_complex "tile=${COLS}x${ROWS}" -frames:v 1 "$WORKDIR/contact.jpg" 2>/dev/null
+echo "Frames extraídos: $COUNT em $FRAMES (não apague antes de o agente ler as imagens)."
+
 echo "Passo 2: extraindo o áudio e apagando o vídeo..."
 ffmpeg -y -i "$VIDEO" -vn -ac 1 -ar 16000 -c:a libmp3lame -q:a 4 "$AUDIO"
 rm -f "$VIDEO"
@@ -41,3 +51,4 @@ echo "Passo 3: transcrevendo o áudio..."
 rm -f "$AUDIO"
 echo "Áudio original apagado."
 echo "Transcrição pronta em: $TRANSCRIPT_DIR/transcript.txt"
+echo "Frames em $FRAMES e contato em $WORKDIR/contact.jpg — apague-os após a revisão visual."
