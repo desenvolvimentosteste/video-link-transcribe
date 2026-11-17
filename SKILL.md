@@ -10,6 +10,20 @@
 
 - Saiba que YouTube costuma funcionar, e Instagram e TikTok nem sempre deixam baixar, pois podem bloquear ou pedir login.
 
+## Baixar imagens e ler com OCR
+
+- Se o link for um post só de imagens, como um carrossel do Instagram, o `yt-dlp` em linha de comando falha ("No video formats found"), porque não há vídeo. Nesse caso o passo seguinte da esteira, em vez de extrair áudio, é baixar as imagens e ler o texto delas com OCR.
+
+- Rode `scripts/download_images.py <url> <pasta-de-imagens> <images.json>` com o Python do ambiente virtual. Ele usa a API Python do `yt-dlp` (`extract_info` com `download=False`): o extrator devolve cada item do post com `thumbnails`, e o script baixa a maior miniatura de cada item, com o cabeçalho Referer do Instagram, salvando como `image-01.jpg`, `image-02.jpg` e assim por diante. Também grava a legenda do post em `images.json`.
+
+- Se a verificação do certificado falhar, o script tenta de novo sem verificar o certificado. Não contorne bloqueio nem login: se o post exigir login, a esteira falha e avise o usuário.
+
+- Depois rode `scripts/ocr_images.sh <pasta-de-imagens> <pasta-de-saída> [idioma]`, que lê cada imagem com `tesseract` (padrão `por+eng`, modo `--psm 6`) e gera um `.txt` por imagem e um `ocr.txt` com todos os textos juntos, na ordem.
+
+- Leia o `ocr.txt` e resuma o conteúdo em português, como faz com a transcrição de vídeo. O OCR erra em texto estilizado e em imagens de capa: confira a imagem com `muse.read` quando o texto sair confuso, e diga o que não ficou claro em vez de adivinhar.
+
+- Apague as imagens depois de ler o OCR, junto com os frames de vídeo, e guarde só o texto.
+
 ## Extrair frames e ler a tela
 
 - Extraia um frame por segundo com `ffmpeg`, em largura máxima de 640 pixels, para a pasta `frames/` da pasta de trabalho, e monte uma grade de contato em `contact.jpg`.
@@ -70,7 +84,9 @@
 
 - Não baixe vídeos privados ou que exijam login, e não contorne bloqueios das plataformas.
 
-- Não guarde vídeo nem áudio depois da esteira, e não use `/tmp` para os arquivos, pois ele tem só 512 MB.
+- Não guarde vídeo, áudio nem imagens depois da esteira, e não use `/tmp` para os arquivos, pois ele tem só 512 MB.
+
+- Instale o `tesseract` no sistema antes do primeiro OCR: `sudo apt-get install -y tesseract-ocr tesseract-ocr-por tesseract-ocr-eng`.
 
 ## Available connectors
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 # Esteira: link de vídeo -> áudio -> transcrição -> só texto.
+# Se o link for um post só de imagens (ex.: carrossel do Instagram),
+# baixa as imagens e lê o texto delas com OCR, em vez de extrair áudio.
 # Uso: pipeline.sh <url> <pasta-de-trabalho> [idioma]
 # A pasta de trabalho deve ficar em ~/workspace/video-pipeline/
 # O vídeo é apagado após extrair o áudio. O áudio é apagado após transcrever.
@@ -24,7 +26,19 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg não instalado." >&2; exit 1; }
 [ -d "$MODEL" ] || { echo "Modelo whisper-tiny não encontrado em $MODEL" >&2; exit 1; }
 
 echo "Passo 1: baixando o vídeo..."
-"$YTDLP" -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --merge-output-format mp4 -o "$VIDEO" "$URL"
+if ! "$YTDLP" -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --merge-output-format mp4 -o "$VIDEO" "$URL" 2>/dev/null; then
+  echo "Sem vídeo no link — tentando baixar como imagens..."
+  IMAGES_DIR="$WORKDIR/images"
+  OCR_DIR="$WORKDIR/ocr"
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  if "$VENV_PY" "$SCRIPT_DIR/download_images.py" "$URL" "$IMAGES_DIR" "$WORKDIR/images.json"; then
+    "$SCRIPT_DIR/ocr_images.sh" "$IMAGES_DIR" "$OCR_DIR" "por+eng"
+    echo "Imagens em $IMAGES_DIR e OCR em $OCR_DIR/ocr.txt — apague as imagens após a revisão."
+    exit 0
+  fi
+  echo "Não foi possível baixar nem vídeo nem imagens deste link." >&2
+  exit 1
+fi
 
 echo "Passo 1b: extraindo frames para leitura visual..."
 FRAMES="$WORKDIR/frames"
