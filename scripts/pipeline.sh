@@ -26,7 +26,13 @@ command -v ffmpeg >/dev/null || { echo "ffmpeg não instalado." >&2; exit 1; }
 [ -d "$MODEL" ] || { echo "Modelo whisper-tiny não encontrado em $MODEL" >&2; exit 1; }
 
 echo "Passo 1: baixando o vídeo..."
-if ! "$YTDLP" -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --merge-output-format mp4 -o "$VIDEO" "$URL" 2>/dev/null; then
+# O proxy de saída da VM apresenta certificado autoassinado que o Python nem
+# sempre valida; sem --no-check-certificates o download falha de forma
+# intermitente com CERTIFICATE_VERIFY_FAILED.
+YTDLP_LOG="$WORKDIR/ytdlp.log"
+if "$YTDLP" --no-check-certificates -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --merge-output-format mp4 -o "$VIDEO" "$URL" >"$YTDLP_LOG" 2>&1 && [ -s "$VIDEO" ]; then
+  :
+elif grep -q "No video formats found" "$YTDLP_LOG" 2>/dev/null; then
   echo "Sem vídeo no link — tentando baixar como imagens..."
   IMAGES_DIR="$WORKDIR/images"
   OCR_DIR="$WORKDIR/ocr"
@@ -37,6 +43,10 @@ if ! "$YTDLP" -f "bestvideo[height<=720]+bestaudio/best[height<=720]/best" --mer
     exit 0
   fi
   echo "Não foi possível baixar nem vídeo nem imagens deste link." >&2
+  exit 1
+else
+  echo "Falha ao baixar o vídeo. Último erro:" >&2
+  tail -5 "$YTDLP_LOG" >&2
   exit 1
 fi
 
