@@ -26,7 +26,7 @@
 
 ## Extrair frames e ler a tela
 
-- Extraia um frame por segundo com `ffmpeg`, em largura máxima de 640 pixels, para a pasta `frames/` da pasta de trabalho, e monte uma grade de contato em `contact.jpg`.
+- Extraia frames com `scripts/extract_frames.py` (ideia da skill Watch): amostragem uniforme com fps automático e teto de 100 frames, mais frames de mudança de cena (limiar 0.20; se houver menos de 8 cenas distintas, o vídeo é quase estático e só a amostragem uniforme cobre tudo), e remoção de duplicados (thumbnail RGB 16x16, diferença média por canal até 2.0). Largura máxima de 640 pixels, pasta `frames/` da pasta de trabalho, grade de contato em `contact.jpg` e lista com timestamps em `frames.json`.
 
 - Leia os frames com `muse.read`, que mostra as imagens, e identifique nomes de sites, ferramentas e textos que aparecem na tela e que a transcrição do áudio não captou.
 
@@ -42,15 +42,21 @@
 
 - Verifique o tamanho e a duração do áudio antes de transcrever, e avise o usuário se o vídeo for longo demais para a memória disponível.
 
-## Transcrever e apagar o áudio
+## Legendas primeiro, depois transcrever
 
-- Transcreva o áudio em pedaços de 60 segundos com o helper em `/opt/muse/assets/audio/transcribe_chunks.py` e o modelo leve em `~/workspace/models/whisper-tiny`.
+- Antes de transcrever, tente as legendas nativas com `scripts/fetch_captions.py <url> <transcript.txt> [idiomas] [yt-dlp]` (ideia da skill Watch): o `yt-dlp` lista as faixas de legenda, escolhe a melhor (manual antes de automática, idiomas preferidos primeiro) e baixa só aquela em VTT, convertida para o formato `[início - fim]  texto`. Se houver legenda com conteúdo, ela vira a transcrição e o Whisper nem roda — mais rápido e mais fiel, principalmente no YouTube. O Instagram quase nunca tem legenda, então ali o caminho continua sendo o Whisper.
+
+- Se não houver legenda, transcreva o áudio em pedaços de 60 segundos com o helper em `/opt/muse/assets/audio/transcribe_chunks.py` e o modelo em `~/workspace/models/whisper-small` (464 MB).
+
+- O modelo small venceu o tiny num teste A/B em 2026-11-18, no mesmo áudio de 98 s: acertou nomes e números que o tiny errava (Mega-Sena, CVM/xerife, PF, 127 mil pessoas — o tiny escreveu "1207 mil") e não estourou a RAM da VM (7,7 GB). O tiny fica em `~/workspace/models/whisper-tiny` como reserva.
 
 - Omita o idioma para detecção automática, ou passe `pt` quando o áudio for em português.
 
 - Apague o arquivo de áudio original logo após confirmar que a transcrição foi concluída, e guarde apenas o texto.
 
 - Trate os arquivos de pedaços como trabalho parcial até o helper escrever `complete.json` e `transcript.txt`.
+
+- Cada execução grava `report.json` na pasta de trabalho, com duração, origem da transcrição (`captions` ou `whisper`), contagem de frames e confirmação de que vídeo e áudio foram apagados.
 
 ## Inferir o nome quando ele não é dito
 
@@ -76,7 +82,9 @@
 
 - Use o ambiente virtual em `~/workspace/venvs/video-pipeline/`, com `yt-dlp` e `faster-whisper` instalados nele.
 
-- Baixe o modelo leve com o Python desse ambiente, para `~/workspace/models/whisper-tiny`, antes da primeira transcrição.
+- Baixe o modelo com o Python desse ambiente, para `~/workspace/models/whisper-small`, antes da primeira transcrição (o tiny vai para `~/workspace/models/whisper-tiny`).
+
+- O que o Watch ensinou e esta esteira adotou (2026-11-18): legendas nativas primeiro, frames com orçamento (teto de 100, cenas + dedup) e relatório da execução. O que esta esteira NÃO adotou do Watch: o WhisperX (pede 8 GB de RAM, a VM tem 7,7 GB), o motor Gemini (precisa de chave) e manter o vídeo para reextrair frames depois — aqui o vídeo continua sendo apagado logo após os frames e o áudio.
 
 ## Limites
 
