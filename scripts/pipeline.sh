@@ -13,6 +13,9 @@
 # - Frames com orçamento: fps automático com teto de 100 frames, mais
 #   frames de mudança de cena e remoção de duplicados (extract_frames.py).
 # - report.json com duração, origem da transcrição e contagem de frames.
+# - Checagem de veracidade: o último passo extrai as afirmações
+#   verificáveis da transcrição (extract_claims.py -> claims.json) para
+#   o agente conferir na web antes de entregar o resumo.
 set -eu
 URL="${1:?Informe o link do vídeo}"
 WORKDIR="${2:?Informe a pasta de trabalho}"
@@ -53,6 +56,8 @@ elif grep -qE "No video formats found|There is no video in this post" "$YTDLP_LO
   if "$VENV_PY" "$SCRIPT_DIR/download_images.py" "$URL" "$IMAGES_DIR" "$WORKDIR/images.json"; then
     "$SCRIPT_DIR/ocr_images.sh" "$IMAGES_DIR" "$OCR_DIR" "por+eng"
     echo "Imagens em $IMAGES_DIR e OCR em $OCR_DIR/ocr.txt — apague as imagens após a revisão."
+    echo "Passo 5: extraindo afirmações verificáveis do OCR..."
+    "$VENV_PY" "$SCRIPT_DIR/extract_claims.py" "$OCR_DIR/ocr.txt" "$WORKDIR/claims.json" 2>/dev/null || true
     exit 0
   fi
   echo "Não foi possível baixar nem vídeo nem imagens deste link." >&2
@@ -130,4 +135,6 @@ report = {
 (workdir / "report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 print(f"relatório em {workdir / 'report.json'}")
 EOF
+echo "Passo 5: extraindo afirmações verificáveis para checagem..."
+"$VENV_PY" "$SCRIPT_DIR/extract_claims.py" "$TRANSCRIPT_DIR/transcript.txt" "$WORKDIR/claims.json" 2>/dev/null || echo "aviso: não foi possível extrair afirmações" >&2
 echo "Frames em $FRAMES e contato em $WORKDIR/contact.jpg — apague-os após a revisão visual."

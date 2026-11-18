@@ -78,6 +78,20 @@
 
 - Diga o que não ficou claro na transcrição, em vez de adivinhar nomes ou números incertos.
 
+## Checar a veracidade (último passo)
+
+- A esteira já gera `claims.json` no Passo 5, com as afirmações verificáveis da transcrição (ou do OCR, no ramo de imagens): números, nomes, métodos e afirmações causais. Leia esse arquivo antes de entregar o resumo.
+
+- Confira cada afirmação na web com busca (`browser.search`), e inclua também os números e nomes que aparecem nos frames mas não estão na transcrição (por exemplo, valores de conta ou de preço mostrados na tela).
+
+- Classifique cada afirmação como **confirmado**, **contestado** ou **sem evidência suficiente**, e cite a fonte usada. Não repita a afirmação do vídeo como fato quando a checagem falhou ou não encontrou nada.
+
+- Números que são o exemplo do próprio vídeo (como uma conta caindo de um valor para outro na animação) são **exemplo do vídeo, não uma promessa geral**: diga isso em vez de apresentar o número como resultado garantido.
+
+- Foque no que importa: números, nomes, afirmações técnicas e conselhos de dinheiro, saúde ou segurança. Não perca tempo checando opiniões nem o apelo final do vídeo ("comenta kit", "marca um amigo").
+
+- Se uma afirmação estiver errada ou exagerada, diga isso claramente no resumo, com o que está certo no lugar. Se a checagem não conseguiu confirmar nem refutar, diga que não foi possível verificar.
+
 ## Preparar o ambiente
 
 - Use o ambiente virtual em `~/workspace/venvs/video-pipeline/`, com `yt-dlp` e `faster-whisper` instalados nele.
